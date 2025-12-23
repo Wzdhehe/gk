@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -113,6 +114,7 @@
             letter-spacing: 2px;
             border-radius: 4px;
             margin-bottom: 5px;
+            outline: none;
         }
 
         .upload-btn:hover {
@@ -125,6 +127,13 @@
             font-size: 0.7rem;
             color: rgba(255,255,255,0.6);
             margin-top: 5px;
+        }
+
+        /* Music Button Specific Style */
+        #music-btn {
+            margin-top: 10px;
+            min-width: 120px;
+            text-align: center;
         }
 
         /* Loading / Camera Preview (Hidden logic) */
@@ -180,6 +189,12 @@
 
     <!-- Camera Input (Hidden) -->
     <video class="input_video"></video>
+    
+    <!-- Audio Element -->
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 
     <!-- UI Overlay -->
     <div id="ui-layer">
@@ -190,13 +205,17 @@
 
         <div id="status-msg">
             正在启动魔法引擎...<br>
-            <span style="font-size: 0.8rem; color: #fff;">请允许摄像头权限以启用手势控制</span>
+            <span style="font-size: 0.8rem; color: #fff;">请允许摄像头权限以启用手势控制<br>点击屏幕开始播放音乐</span>
         </div>
 
         <div id="upload-container">
             <!-- Hidden by default unless user wants to override -->
             <label for="image-upload" class="upload-btn">更换其他照片</label>
             <input type="file" id="image-upload" accept="image/*" multiple>
+            
+            <!-- Music Control Button -->
+            <button id="music-btn" class="upload-btn">🎵 播放音乐</button>
+
             <div class="upload-hint">默认加载项目中 photos/ 文件夹下的图片</div>
         </div>
 
@@ -649,7 +668,57 @@
             }
         });
 
-        // --- 9. RENDER LOOP ---
+        // --- 9. MUSIC CONTROLS ---
+        const music = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-btn');
+        let musicPlaying = false;
+
+        function toggleMusic() {
+            if (musicPlaying) {
+                music.pause();
+                musicBtn.innerHTML = '🔇 播放音乐';
+                musicBtn.style.opacity = '0.7';
+            } else {
+                music.play().then(() => {
+                    musicBtn.innerHTML = '🎵 暂停音乐';
+                    musicBtn.style.opacity = '1';
+                    musicPlaying = true;
+                }).catch(e => {
+                    console.log("Audio auto-play blocked until interaction");
+                });
+            }
+            musicPlaying = !music.paused;
+        }
+
+        musicBtn.addEventListener('click', toggleMusic);
+
+        // Attempt autoplay on any interaction (browser policy)
+        function tryAutoPlay() {
+            if (music.paused) {
+                music.volume = 0.5; // Set volume to 50%
+                music.play().then(() => {
+                    musicBtn.innerHTML = '🎵 暂停音乐';
+                    musicBtn.style.opacity = '1';
+                    musicPlaying = true;
+                }).catch(() => {
+                    // Waiting for interaction
+                });
+            }
+            // Remove listener once played
+            if (!music.paused) {
+                document.body.removeEventListener('click', tryAutoPlay);
+                document.body.removeEventListener('touchstart', tryAutoPlay);
+            }
+        }
+
+        // Try to play immediately (often blocked)
+        tryAutoPlay();
+        // Try to play on first click/tap anywhere
+        document.body.addEventListener('click', tryAutoPlay);
+        document.body.addEventListener('touchstart', tryAutoPlay);
+
+
+        // --- 10. RENDER LOOP ---
         const clock = new THREE.Clock();
 
         function animate() {
