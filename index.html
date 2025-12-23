@@ -43,7 +43,7 @@
 
         .header {
             text-align: center;
-            color: #d4af37;
+            color: #d4af37; /* Gold */
             text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
             margin-top: 20px;
         }
@@ -61,33 +61,6 @@
             margin-top: 10px;
             font-weight: 300;
             opacity: 0.9;
-        }
-
-        /* 音乐控制按钮 */
-        #music-control {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            pointer-events: auto;
-            color: #d4af37;
-            border: 1px solid #d4af37;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            background: rgba(0, 0, 0, 0.5);
-            transition: all 0.3s;
-            z-index: 20;
-        }
-        
-        #music-control:hover {
-            background: #d4af37;
-            color: #000;
-            box-shadow: 0 0 15px #d4af37;
         }
 
         .controls-info {
@@ -111,6 +84,7 @@
             margin-right: 8px;
         }
 
+        /* Top Right Container */
         #upload-container {
             position: absolute;
             top: 30px;
@@ -127,7 +101,7 @@
         }
 
         .upload-btn {
-            background: rgba(15, 59, 30, 0.8);
+            background: rgba(15, 59, 30, 0.8); /* Matte Green */
             color: #d4af37;
             border: 1px solid #d4af37;
             padding: 8px 15px;
@@ -138,6 +112,7 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             border-radius: 4px;
+            margin-bottom: 5px;
         }
 
         .upload-btn:hover {
@@ -145,7 +120,51 @@
             color: #0f3b1e;
             box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
         }
+        
+        .upload-hint {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
 
+        /* --- Music Button Styles --- */
+        #music-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #d4af37;
+            color: #d4af37;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        #music-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Playing state animation */
+        #music-toggle.playing {
+            background: #d4af37;
+            color: #0f3b1e;
+            animation: spin 3s linear infinite;
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Loading / Camera Preview (Hidden logic) */
         .input_video {
             display: none;
         }
@@ -156,15 +175,16 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #d4af37;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             background: rgba(0,0,0,0.8);
             padding: 20px;
             border-radius: 10px;
             border: 1px solid #d4af37;
             text-align: center;
-            z-index: 100;
+            transition: opacity 0.5s;
         }
 
+        /* Germany Wish */
         .germany-wish {
             position: absolute;
             bottom: 30px;
@@ -175,25 +195,37 @@
         .germany-wish span {
             display: block;
             font-size: 0.9rem;
-            color: #b3000c;
+            color: #b3000c; /* Christmas Red */
             margin-top: 5px;
+        }
+
+        /* Hand Tracking Debug (Optional, small dot) */
+        #hand-tracker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d4af37;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 100;
+            display: none; /* Hidden by default, enable if needed */
         }
     </style>
 </head>
 <body>
 
-    <!-- 音乐文件 -->
-    <!-- 优先尝试加载本地 music.mp3，失败则使用在线链接 -->
-    <audio id="bgm" loop>
-        <source src="music.mp3" type="audio/mpeg">
-        <source src="https://upload.wikimedia.org/wikipedia/commons/e/e6/Jingle_Bells_-_Kevin_MacLeod_-_no_voice.ogg" type="audio/ogg">
-    </audio>
-
+    <!-- Camera Input (Hidden) -->
     <video class="input_video"></video>
 
-    <div id="ui-layer">
-        <div id="music-control" title="播放/暂停音乐">🎵</div>
+    <!-- Audio Element (Hidden) -->
+    <audio id="bgm" loop>
+        <source src="music.mp3" type="audio/mpeg">
+        您的浏览器不支持音频元素。
+    </audio>
 
+    <!-- UI Overlay -->
+    <div id="ui-layer">
         <div class="header">
             <h1>Merry Christmas</h1>
             <div class="subtitle">For Gao Ke</div>
@@ -201,19 +233,26 @@
 
         <div id="status-msg">
             正在启动魔法引擎...<br>
-            <span style="font-size: 0.8rem; color: #fff;">请确保光线充足并允许摄像头权限</span>
+            <span style="font-size: 0.8rem; color: #fff;">请允许摄像头权限以启用手势控制</span>
         </div>
 
         <div id="upload-container">
-            <label for="image-upload" class="upload-btn">更换照片</label>
+            <!-- Upload Button -->
+            <label for="image-upload" class="upload-btn">更换其他照片</label>
             <input type="file" id="image-upload" accept="image/*" multiple>
+            <div class="upload-hint">默认加载 photos/ 文件夹下的图片</div>
+
+            <!-- Music Button -->
+            <div id="music-toggle" title="播放/暂停音乐">
+                🎵
+            </div>
         </div>
 
         <div class="controls-info">
-            <div><span class="icon">✊</span> 握拳 - 聚合树</div>
-            <div><span class="icon">🖐</span> 张开 - 散开</div>
-            <div><span class="icon">🤏</span> 捏合 - 拾取照片</div>
+            <div><span class="icon">✊</span> 握拳 - 聚合圣诞树</div>
+            <div><span class="icon">🖐</span> 张开 - 散开星尘</div>
             <div><span class="icon">👋</span> 移动 - 旋转视角</div>
+            <div><span class="icon">🤏</span> 捏合 - 拾取回忆</div>
         </div>
 
         <div class="germany-wish">
@@ -222,88 +261,57 @@
         </div>
     </div>
 
+    <!-- Hand Tracker Dot -->
+    <div id="hand-tracker"></div>
+
     <div id="canvas-container"></div>
 
+    <!-- Libraries -->
+    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Post Processing -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <!-- Tween.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+    <!-- MediaPipe -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
     <script>
-        const CONFIG = {
-            colors: { green: 0x0f3b1e, gold: 0xd4af37, red: 0xb3000c, white: 0xffffff },
-            particleCount: 450,
-            treeHeight: 30,
-            treeRadius: 12,
-            scatterRadius: 60,
-            defaultImages: ['photos/1.jpg', 'photos/2.jpg', 'photos/3.jpg', 'photos/4.jpg', 'photos/5.jpg']
-        };
-
-        const STATE = { TREE: 'tree', SCATTER: 'scatter', INSPECT: 'inspect' };
-        let currentState = STATE.TREE;
-        let photoTextures = [];
-        let particles = [];
-        let photoParticles = [];
-        let focusedPhotoIndex = -1;
-
-        // --- 音乐控制逻辑 ---
-        const bgm = document.getElementById('bgm');
-        const musicBtn = document.getElementById('music-control');
+        // --- MUSIC CONTROL LOGIC ---
+        const audio = document.getElementById('bgm');
+        const musicBtn = document.getElementById('music-toggle');
         let isMusicPlaying = false;
 
-        // 尝试自动播放（通常会被浏览器拦截，所以需要交互）
-        document.body.addEventListener('click', () => {
-            if (!isMusicPlaying) {
-                bgm.play().then(() => {
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play().then(() => {
                     isMusicPlaying = true;
-                    musicBtn.innerHTML = '⏸';
-                }).catch(e => console.log("等待交互播放音乐"));
+                    musicBtn.classList.add('playing');
+                }).catch(e => console.log("Autoplay prevented:", e));
+            } else {
+                audio.pause();
+                isMusicPlaying = false;
+                musicBtn.classList.remove('playing');
             }
-        }, { once: true });
+        }
 
         musicBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (bgm.paused) {
-                bgm.play();
-                musicBtn.innerHTML = '⏸';
-                isMusicPlaying = true;
-            } else {
-                bgm.pause();
-                musicBtn.innerHTML = '🎵';
-                isMusicPlaying = false;
-            }
+            e.stopPropagation(); // Prevent triggering other click events
+            toggleMusic();
         });
 
-        // --- Three.js ---
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x050505, 0.02);
-
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 0, 50);
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.toneMapping = THREE.ReinhardToneMapping;
-        container.appendChild(renderer.domElement);
-
-        const treeGroup = new THREE.Group();
-        scene.add(treeGroup);
-
-        scene.add(new THREE.AmbientLight(0x404040, 2));
-        const pointLight = new THREE.PointLight(CONFIG.colors.gold, 2, 100);
-        pointLight.position.set(10, 20, 20);
-        scene.add(pointLight);
-
-        const composer = new THREE.EffectComposer(renderer);
-        composer.addPass(new THREE.RenderPass(scene, camera));
-        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-        bloomPass.threshold = 0;
-  
+        // Attempt Auto-play on load
+        window.addEventListener('load', () => {
+            audio.volume = 0.5; // Set volume to 50%
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Autoplay sta
